@@ -8,12 +8,12 @@ tokens = {
         "example": "fishport"
     },
     "IF": {
-        "regex": r"<if",
-        "example": "<if"
+        "regex": r"if",
+        "example": "if"
     },
     "ELSE": {
-        "regex": r"<else",
-        "example": "<else"
+        "regex": r"else",
+        "example": "else"
     },
     "FUNCION": {
         "regex": r"fishtion",
@@ -35,6 +35,7 @@ tokens = {
         "regex": r"emerge",
         "example": "emerge"
     },
+    # TIPOS DE DATOS - Solo estos tienen "<"
     "ENTERO": {
         "regex": r"<int",
         "example": "<int"
@@ -44,8 +45,8 @@ tokens = {
         "example": "<string"
     },
     "CHAR": {
-        "regex": r"<char",
-        "example": "<char"
+        "regex": r"<charal",
+        "example": "<charal"
     },
     "FLOAT": {
         "regex": r"<bubble",
@@ -55,6 +56,7 @@ tokens = {
         "regex": r"<hook",
         "example": "<hook"
     },
+    # FIN TIPOS DE DATOS
     "WHILE": {
         "regex": r"whale",
         "example": "whale"
@@ -80,7 +82,7 @@ tokens = {
         "example": "<="
     },
     "OP_SUMA": {
-        "regex": r"\<+",
+        "regex": r"<\+",
         "example": "<+"
     },
     "OP_RESTA": {
@@ -88,7 +90,7 @@ tokens = {
         "example": "<-"
     },
     "OP_MULTIPLICACION": {
-        "regex": r"<*",
+        "regex": r"<\*",
         "example": "<*"
     },
     "OP_DIVISION": {
@@ -108,28 +110,28 @@ tokens = {
         "example": "<<>"
     },
     "DELIMITADOR": {
-        "regex": r"<\D",
+        "regex": r"<D",
         "example": "<D"
     },
     "OP_IGUAL": {
-    "regex": r"<==",
-    "example": "<=="
+        "regex": r"<==",
+        "example": "<=="
     },
     "OP_DIFERENTE": {
-    "regex": r"<!=",
-    "example": "<!="
+        "regex": r"<!=",
+        "example": "<!="
     },
     "OP_MENOR_IGUAL": {
-    "regex": r"<<=",
-    "example": "<<="
+        "regex": r"<<=",
+        "example": "<<="
     },
     "OP_MAYOR_IGUAL": {
-    "regex": r"<<>=",
-    "example": "<<>="
+        "regex": r"<<>=",
+        "example": "<<>="
     },
     "PARENTESIS_IZQ": {
-    "regex": r"\(",
-    "example": "("
+        "regex": r"\(",
+        "example": "("
     },
     "PARENTESIS_DER": {
         "regex": r"\)",
@@ -160,16 +162,16 @@ tokens = {
         "example": "."
     },
     "ARRAY": {
-    "regex": r"array", 
-    "example": "array"
+        "regex": r"array", 
+        "example": "array"
     },
     "DICT": {
-    "regex": r"dict", 
-    "example": "dict"
+        "regex": r"dict", 
+        "example": "dict"
     },
     "COMENTARIO_LINEA": {
-    "regex": r"~~.*",  # ondas del agua
-    "example": "~~ esto es un comentario"
+        "regex": r"~~.*",
+        "example": "~~ esto es un comentario"
     },
     "COMENTARIO_BLOQUE_INICIO": {
         "regex": r"<~",
@@ -180,11 +182,11 @@ tokens = {
         "example": "~>"
     },
     "INCREMENTO": {
-    "regex": r"<\+\+",
-    "example": "<++"
+        "regex": r"<\+\+",
+        "example": "<++"
     },
     "DECREMENTO": {
         "regex": r"<--",
         "example": "<--"
     }   
-    }
+}
