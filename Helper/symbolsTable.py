@@ -20,16 +20,16 @@ tokens = {
         "example": "fishtion"
     },
     "TRY": {
-        "regex": r"<try",
-        "example": "<try"
+        "regex": r"try",
+        "example": "try"
     },
     "CATCH": {
-        "regex": r"<catch",
-        "example": "<catch"
+        "regex": r"catch",
+        "example": "catch"
     },
     "FINALLY": {
-        "regex": r"<finally",
-        "example": "<finally"
+        "regex": r"finally",
+        "example": "finally"
     },
     "RETURN": {
         "regex": r"emerge",
@@ -60,7 +60,7 @@ tokens = {
         "example": "whale"
     },
     "FOR": {
-        "regex": r"forK",
+        "regex": r"fork",
         "example": "fork"
     },
     "PRINT": {
@@ -110,5 +110,81 @@ tokens = {
     "DELIMITADOR": {
         "regex": r"<\D",
         "example": "<D"
+    },
+    "OP_IGUAL": {
+    "regex": r"<==",
+    "example": "<=="
+    },
+    "OP_DIFERENTE": {
+    "regex": r"<!=",
+    "example": "<!="
+    },
+    "OP_MENOR_IGUAL": {
+    "regex": r"<<=",
+    "example": "<<="
+    },
+    "OP_MAYOR_IGUAL": {
+    "regex": r"<<>=",
+    "example": "<<>="
+    },
+    "PARENTESIS_IZQ": {
+    "regex": r"\(",
+    "example": "("
+    },
+    "PARENTESIS_DER": {
+        "regex": r"\)",
+        "example": ")"
+    },
+    "CORCHETE_IZQ": {
+        "regex": r"\[",
+        "example": "["
+    },
+    "CORCHETE_DER": {
+        "regex": r"\]",
+        "example": "]"
+    },
+    "LLAVE_IZQ": {
+        "regex": r"\{",
+        "example": "{"
+    },
+    "LLAVE_DER": {
+        "regex": r"\}",
+        "example": "}"
+    },
+    "COMA": {
+        "regex": r",",
+        "example": ","
+    },
+    "PUNTO": {
+        "regex": r"\.",
+        "example": "."
+    },
+    "ARRAY": {
+    "regex": r"array", 
+    "example": "array"
+    },
+    "DICT": {
+    "regex": r"dict", 
+    "example": "dict"
+    },
+    "COMENTARIO_LINEA": {
+    "regex": r"~~.*",  # ondas del agua
+    "example": "~~ esto es un comentario"
+    },
+    "COMENTARIO_BLOQUE_INICIO": {
+        "regex": r"<~",
+        "example": "<~"
+    },
+    "COMENTARIO_BLOQUE_FIN": {
+        "regex": r"~>",
+        "example": "~>"
+    },
+    "INCREMENTO": {
+    "regex": r"<\+\+",
+    "example": "<++"
+    },
+    "DECREMENTO": {
+        "regex": r"<--",
+        "example": "<--"
+    }   
     }
-}
