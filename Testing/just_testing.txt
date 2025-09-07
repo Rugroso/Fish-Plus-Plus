@@ -1,24 +1,24 @@
 fish {                       ~~ Inicio del programa principal ~~
 
-    fishtion sumar(<int a, <int b) <int {    ~~ Definición de función ~~
-        emerge a <+ b
+    fishtion sumar(<int a, <int b) <int {      ~~ Definición de función ~~
+        emerge a <+ b<D
     }
 
-    <int contador <= 0
-    whale (contador << 5) {                  ~~ Ciclo while ~~
-        splash("Iteración: ")                ~~ Imprimir ~~
-        splash(contador)
-        contador <++                         ~~ Incremento ~~
+    <int contador <= 0<D
+    whale (contador << 5) {                    ~~ Ciclo while ~~
+        splash("Iteración: ")<D                ~~ Imprimir ~~
+        splash(contador)<D
+        contador <++<D                         ~~ Incremento ~~
     }
 
-    if (contador <<> 5) {                    ~~ Condicional ~~
-        splash("El contador es mayor que 5")
+    if (contador <<> 5) {                      ~~ Condicional ~~
+        splash("El contador es mayor que 5")<D
     } else {
-        splash("El contador no es mayor que 5")
+        splash("El contador no es mayor que 5")<D
     }
 
-    <int resultado <= sumar(3, 4)
-    splash("El resultado de la suma es:")
-    splash(resultado)
+    <int resultado <= sumar(3, 4)<D
+    splash("El resultado de la suma es:")<D
+    splash(resultado)<D
 
 }
