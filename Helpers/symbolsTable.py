@@ -77,6 +77,14 @@ tokens = {
         "regex": r"[0-9]+(\.[0-9]+)?",
         "example": "42, 3.14"
     },
+    "String_Literal": {
+        "regex": r'"([^"\\]|\\.)*"',
+        "example": '"Hola, Mundo!"'
+    },
+    "CHAR_Literal": {
+        "regex": r"'([^'\\]|\\.)'",
+        "example": "'a'"
+    },
     "ASIGNACION": {
         "regex": r"<=",
         "example": "<="
