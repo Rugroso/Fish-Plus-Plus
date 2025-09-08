@@ -21,5 +21,4 @@ fish {                       ~~ Inicio del programa principal ~~
     <int resultado <= sumar(3, 4)<D
     splash("El resultado de la suma es:")<D
     splash(resultado)<D
-
 }

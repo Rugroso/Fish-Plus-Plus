@@ -11,7 +11,6 @@ transitions = [
     (125, 6, 'num'), # - seguido de número
     (0, 5, 'char'),
     (5, 5, 'char'),
-    # Eliminar transiciones de operadores solos
     (0, 2, '('),
     (5, 9, '+'),
     (7, 6, 'num'),

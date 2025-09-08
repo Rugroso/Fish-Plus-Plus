@@ -1,3 +1,15 @@
+def is_alpha(char):
+    # Verifica si el carácter es una letra (mayúscula/minúscula) o '_'
+    return (
+        (char >= 'a' and char <= 'z') or
+        (char >= 'A' and char <= 'Z') or
+        char == '_'
+    )
+
+def is_digit(char):
+    # Verifica si el carácter es un dígito explícitamente
+    return char >= '0' and char <= '9'
+
 # Conjunto de estados de prefijos de reservadas
 RESERVED_PREFIX_STATES = {
     53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 67, 68, 69, 70, 71, 120, 121, 65,
@@ -46,4 +58,4 @@ def classify_state(state: int) -> str:
     # Literales
     123: 'STRING',
     }
-    return mapping.get(state, 'UNKNOWN')
+    return mapping.get(state, 'NO RECONOCIDO')
