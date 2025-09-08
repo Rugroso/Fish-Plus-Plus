@@ -24,4 +24,5 @@ text = clean_input(raw)
 tokens = process_tokens(automaton, text)
 if not tokens:
     pass
-print("Tokens:", tokens)
+for token in tokens:
+    print("Token:", token)

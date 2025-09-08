@@ -20,7 +20,7 @@ def classify_state(state: int) -> str:
     # Identificadores y números
     if state == ID_STATE:
         return 'ID'
-    if state == NUM_STATE:
+    if state == NUM_STATE or state == 127:  # Números enteros y decimales
         return 'NUM'
     # Prefijo de reservada inconcluso
     if state in RESERVED_PREFIX_STATES and state not in RESERVED_FINAL_STATES:
@@ -34,7 +34,7 @@ def classify_state(state: int) -> str:
         22: 'OP_MENOR_IGUAL', 23: 'OP_DIFERENTE', 24: 'OP_IGUAL', 25: 'INCREMENTO',
         26: 'DECREMENTO', 27: 'OP_MAYOR_IGUAL', 19: 'DELIMITADOR', 20: 'COMENTARIO_BLOQUE_INICIO',
         # Palabras reservadas
-        56: 'MAIN', 60: 'IMPORTAR', 64: 'FUNCION', 65: 'FOR', 71: 'FINALLY', 73: 'IF',
+        56: 'MAIN', 60: 'IMPORT', 64: 'FUNCTION', 65: 'FOR', 71: 'FINALLY', 73: 'IF',
         77: 'ELSE', 82: 'RETURN', 85: 'TRY', 90: 'CATCH', 95: 'WHILE', 101: 'PRINT',
         106: 'ARRAY', 110: 'DICT',
         # Símbolos

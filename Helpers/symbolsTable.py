@@ -3,6 +3,7 @@ tokens = {
         "regex": r"fish",
         "example": "fish"
     },
+    
     "IMPORTAR": {
         "regex": r"fishport",
         "example": "fishport"
@@ -196,5 +197,14 @@ tokens = {
     "DECREMENTO": {
         "regex": r"<--",
         "example": "<--"
-    }   
+    },
+    # Literales
+    "STRING_LITERAL": {
+        "regex": r'"([^"\\]|\\.)*"',
+        "example": '"Hola, Mundo!"'
+    },
+    "NUM_LITERAL": {
+        "regex": r"[0-9]+(\.[0-9]+)?",
+        "example": "42, 3.14"
+    }
 }

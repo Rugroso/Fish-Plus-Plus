@@ -9,6 +9,7 @@ fish {                       ~~ Inicio del programa principal ~~
         splash("Iteración: ")<D                ~~ Imprimir ~~
         splash(contador)<D
         contador <++<D                         ~~ Incremento ~~
+        contador2 <= +5 
     }
 
     if (contador <<> 5) {                      ~~ Condicional ~~

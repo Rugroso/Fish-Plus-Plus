@@ -46,19 +46,21 @@ def process_tokens(self, input_text: str) -> list:
                 buffer += c
                 i += 1
             else:
-                # Fallback: si rompemos un prefijo reservado (no final), convertirse en id sin consumir c
+                # Si rompemos un prefijo reservado (no final), convertirse en id sin consumir c
+                # De esta forma simplificamos la lógica y evitamos una cantidad excesiva de transiciones
+                # Se puede consultar como se diseñaron estas transiciones en el DFA y NDFA
                 if (state in RESERVED_PREFIX_STATES and state not in RESERVED_FINAL_STATES
                         and (c.isalpha() or c.isdigit())):
                     state = ID_STATE
                     continue
                 # Volcar token si hay uno aceptado
                 if buffer and state in self.accept_states:
-                    tokens.append(classify_state(state))
+                    tokens.append((buffer, classify_state(state)))
                 # Reset y reintentar con el mismo carácter
                 buffer = ""
                 state = self.start_state
                 continue
 
         if buffer and state in self.accept_states:
-            tokens.append(classify_state(state))
+            tokens.append((buffer, classify_state(state)))
         return tokens
