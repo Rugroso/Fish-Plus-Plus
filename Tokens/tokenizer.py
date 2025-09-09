@@ -14,13 +14,21 @@ def process_tokens(self, input_text: str) -> list:
 
         reserved_initials = {'f', 'i', 'e', 't', 'c', 'w', 's', 'a', 'd'}
 
+
+        CHAR_BODY_STATE = 200
+        CHAR_END_STATE = 201
+
         while i < n:
             c = input_text[i]
             # Categoría
             if state == STRING_BODY_STATE:
                 category = '"' if c == '"' else 'str'
+            elif state == CHAR_BODY_STATE:
+                category = "'" if c == "'" else 'char_body'
             elif c == '"':
                 category = '"'
+            elif c == "'":
+                category = "'"
             elif is_alpha(c):
                 if state == 0 and c in reserved_initials:
                     category = c
@@ -40,7 +48,46 @@ def process_tokens(self, input_text: str) -> list:
                 i += 1
                 continue
 
-            # Transición
+            # Transición para char literal
+            if state == 0 and c == "'":
+                state = CHAR_BODY_STATE
+                buffer += c
+                i += 1
+                continue
+            elif state == CHAR_BODY_STATE:
+                # Solo se permite un caracter entre comillas simples
+                if c != "'" and c != '\\':
+                    buffer += c
+                    i += 1
+                    continue
+                elif c == '\\':
+                    # Soporte para escape de caracter
+                    if i + 1 < n:
+                        buffer += c + input_text[i+1]
+                        i += 2
+                        continue
+                elif c == "'":
+                    buffer += c
+                    state = CHAR_END_STATE
+                    i += 1
+                    continue
+            elif state == CHAR_END_STATE:
+                tokens.append((buffer, 'CHAR'))
+                buffer = ""
+                state = self.start_state
+                continue
+
+            # Lógica especial: si estamos en estado de número y el siguiente carácter es letra, marcar como NO VALIDO
+            if state == 6 and is_alpha(input_text[i]):
+                buffer += input_text[i]
+                i += 1
+                while i < n and (is_alpha(input_text[i]) or is_digit(input_text[i])):
+                    buffer += input_text[i]
+                    i += 1
+                tokens.append((buffer, 'NO VALIDO'))
+                buffer = ""
+                state = self.start_state
+                continue
             if category in self.states[state]:
                 print (f"Transición: {state} --{category}--> {self.states[state][category]}")
                 state = self.states[state][category]
@@ -49,8 +96,6 @@ def process_tokens(self, input_text: str) -> list:
                 i += 1
             else:
                 # Si rompemos un prefijo reservado (no final), convertirse en id sin consumir c
-                # De esta forma simplificamos la lógica y evitamos una cantidad excesiva de transiciones
-                # Se puede consultar como se diseñaron estas transiciones en el DFA y NDFA
                 if (state in RESERVED_PREFIX_STATES and state not in RESERVED_FINAL_STATES
                         and (is_alpha(c) or is_digit(c))):
                     state = ID_STATE
@@ -60,7 +105,6 @@ def process_tokens(self, input_text: str) -> list:
                     tokens.append((buffer, classify_state(state)))
                 elif buffer:
                     tokens.append((buffer, 'NO RECONOCIDO'))
-                # Reset y reintentar con el mismo carácter
                 buffer = ""
                 state = self.start_state
                 continue

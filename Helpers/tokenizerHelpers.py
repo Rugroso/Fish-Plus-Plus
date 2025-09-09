@@ -19,6 +19,7 @@ RESERVED_PREFIX_STATES = {
     107, 108, 109, 110,
 }
 
+
 # Finales de palabras reservadas
 RESERVED_FINAL_STATES = {
     56, 60, 64, 65, 71, 73, 77, 82, 85, 90, 95, 101, 106, 110,
@@ -27,6 +28,7 @@ ID_STATE = 5
 NUM_STATE = 6
 STRING_BODY_STATE = 122
 STRING_END_STATE = 123
+CHAR_END_STATE = 201
 
 def classify_state(state: int) -> str:
     # Identificadores y números
@@ -34,6 +36,8 @@ def classify_state(state: int) -> str:
         return 'ID'
     if state == NUM_STATE or state == 127:  # Números enteros y decimales
         return 'NUM'
+    if state == CHAR_END_STATE:
+        return 'CHAR'
     # Prefijo de reservada inconcluso
     if state in RESERVED_PREFIX_STATES and state not in RESERVED_FINAL_STATES:
         return 'ID'
