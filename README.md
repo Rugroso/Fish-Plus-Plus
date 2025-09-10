@@ -13,10 +13,8 @@ Fish++/
 │   ├── symbolsTable.py
 │   ├── tokenizerHelpers.py
 │   ├── transitions.py
-│   └── __pycache__/
 ├── Tokens/                # Tokenizer implementation
 │   ├── tokenizer.py
-│   └── __pycache__/
 ├── Testing/               # Test files and examples
 │   └── just_testing.txt
 ```
