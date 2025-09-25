@@ -1,0 +1,27 @@
+# Production Rules for Fish++ Syntax Analyzer
+
+```
+Program      = fish { Statements }
+Statements   = Statement Statements | ε
+Statement    = Declaration | Assignment | FunctionDef | WhileLoop | IfElse | FunctionCall | Print
+Declaration  = <int Ident <= expr <D
+Assignment   = Ident <= expr <D
+FunctionDef  = fishtion Ident (Params) <int { Statements }
+Params       = Param , Params | Param | ε
+Param        = <int Ident
+WhileLoop    = whale (expr) { Statements }
+IfElse       = if (expr) { Statements } else { Statements }
+FunctionCall = Ident (Args) <D
+Args         = expr , Args | expr | ε
+Print        = splash(expr) <D
+expr         = expr <+ expr | expr <++ <D | expr << expr | expr <<> expr | expr <D | Ident | Number | String
+Ident        = [a-zA-Z_][a-zA-Z0-9_]*
+Number       = [0-9]+
+String       = "[^"]*"
+```
+
+You can expand or modify these rules as needed for your parser. Each rule follows the format:
+
+[NonTerminal] = [Production] + [Production]
+
+Where `+` means alternative productions (use `|` for clarity). If you want to add more operators or constructs, just follow the same style.

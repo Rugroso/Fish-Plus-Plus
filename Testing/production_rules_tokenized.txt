@@ -1,0 +1,49 @@
+
+Statement      = Assignment         # contador <= 5<D
+               | IfElse            # if (x << 10) { ... } else { ... }
+               | WhileLoop         # while (x << 10) { ... }
+               | ForLoop           # for (i <= 0<D; i << 10<D; i<++<D) { ... }
+               | FunctionCallStmt  # sumar(3, 4)<D
+               | Print             # splash("Hola")<D
+               | IncDecStmt        # contador<++<D
+               | ReturnStmt        # return x<D
+               | Block             # { ... }
+               | ε
+
+Assignment     = ID ASIGNACION Expr DELIMITADOR         # contador <= 5<D
+IncDec         = ID INCREMENTO DELIMITADOR              # contador<++<D
+               | ID DECREMENTO DELIMITADOR              # contador<--<D
+Return         = RETURN Expr DELIMITADOR                # return x<D
+FunctionCall   = ID PARENTESIS_IZQ Args PARENTESIS_DER DELIMITADOR     # sumar(3, 4)<D
+Print          = PRINT PARENTESIS_IZQ Expr PARENTESIS_DER DELIMITADOR  # splash("Hola")<D
+
+FunctionDef    = FUNCION ID PARENTESIS_IZQ Params PARENTESIS_DER Type Block   # fishtion sumar(<int a, <int b) <int { ... }
+
+Params         = Param (COMA Param)* | ε                # <int a, <int b
+Param          = Type ID                                # <int a
+Args           = Expr (COMA Expr)* | ε                  # 3, 4
+
+WhileLoop      = WHILE PARENTESIS_IZQ Expr PARENTESIS_DER Block   # while (x << 10) { ... }
+IfElse         = IF PARENTESIS_IZQ Expr PARENTESIS_DER Block ELSE Block   # if (x << 10) { ... } else { ... }
+ForLoop        = FOR PARENTESIS_IZQ ForInit DELIMITADOR ForCond DELIMITADOR ForStep PARENTESIS_DER Block   # for (i <= 0<D; i << 10<D; i<++<D) { ... }
+ForInit        = Declaration | Assignment | ε            # i <= 0<D
+ForCond        = Expr | ε                               # i << 10
+ForStep        = IncDecStmt | Assignment | ε            # i<++<D
+
+Block          = LLAVE_IZQ DeclsAndStmts LLAVE_DER      # { ... }
+
+Type           = ENTERO | STRING | CHAR | FLOAT | BOOLEANO   # <int, <string, <charal, <bubble, <hook
+
+=Expr          = Equality                                # x <== y
+
+Equality       = Relational ( (OP_IGUAL | OP_DIFERENTE) Relational )*   # x <== y, x <!= y
+Relational     = Add ( (OP_MENOR_QUE | OP_MAYOR_QUE | OP_MENOR_IGUAL | OP_MAYOR_IGUAL) Add )*   # x << y, x <<> y
+Add            = Mul ( (OP_SUMA | OP_RESTA) Mul )*       # x <+ y, x <- y
+Mul            = Unary ( (OP_MULTIPLICACION | OP_DIVISION | OP_MODULO) Unary )*   # x <* y, x </ y, x <% y
+Unary          = (OP_SUMA | OP_RESTA | INCREMENTO | DECREMENTO) Unary | Primary   # <+x, <++x, <--x
+Primary        = ID                                      # contador
+               | NUM                                     # 42
+               | String_Literal                          # "Hola"
+               | CHAR_Literal                            # 'a'
+               | PARENTESIS_IZQ Expr PARENTESIS_DER      # (x <+ y)
+
