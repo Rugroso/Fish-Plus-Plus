@@ -4,11 +4,11 @@
 Program      = fish { Statements }
 Statements   = Statement Statements | ε
 Statement    = Declaration | Assignment | FunctionDef | WhileLoop | IfElse | FunctionCall | Print
-Declaration  = <int Ident <= expr <D
+Declaration  = ENTERO Ident <= expr <D
 Assignment   = Ident <= expr <D
-FunctionDef  = fishtion Ident (Params) <int { Statements }
+FunctionDef  = fishtion Ident (Params) ENTERO { Statements }
 Params       = Param , Params | Param | ε
-Param        = <int Ident
+Param        = ENTERO Ident
 WhileLoop    = whale (expr) { Statements }
 IfElse       = if (expr) { Statements } else { Statements }
 FunctionCall = Ident (Args) <D
