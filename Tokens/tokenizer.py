@@ -89,10 +89,10 @@ def process_tokens(self, input_text: str) -> list:
                 state = self.start_state
                 continue
             if category in self.states[state]:
-                print (f"Transición: {state} --{category}--> {self.states[state][category]}")
+                #print (f"Transición: {state} --{category}--> {self.states[state][category]}")
                 state = self.states[state][category]
                 buffer += c
-                print (state)
+                #print (state)
                 i += 1
             else:
                 # Si rompemos un prefijo reservado (no final), convertirse en id sin consumir c

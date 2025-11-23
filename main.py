@@ -2,6 +2,7 @@ from Tokens.tokenizer import process_tokens
 from Helpers.cleaner import clean_input
 from Helpers.transitions import transitions, accept_states
 from Helpers.reader import reader
+from Parser.parser import Parser
 
 class Automaton:
     def __init__(self, transitions: list, accept_states: set):
@@ -24,5 +25,9 @@ text = clean_input(raw)
 tokens = process_tokens(automaton, text)
 if not tokens:
     pass
-for token in tokens:
-    print("Token:", token)
+# for token in tokens:
+#     print("Token:", token)
+    
+parser = Parser(tokens)
+parser.parse()
+print("Parsed Output:", "Parsing completed successfully")

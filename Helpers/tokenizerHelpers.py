@@ -33,33 +33,70 @@ CHAR_END_STATE = 201
 def classify_state(state: int) -> str:
     # Identificadores y números
     if state == ID_STATE:
-        return 'ID'
+        return 'ident'
     if state == NUM_STATE or state == 127:  # Números enteros y decimales
         return 'NUM'
     if state == CHAR_END_STATE:
-        return 'CHAR'
+        return 'CHAR_LITERAL'
     # Prefijo de reservada inconcluso
     if state in RESERVED_PREFIX_STATES and state not in RESERVED_FINAL_STATES:
-        return 'ID'
+        return 'ident'
     mapping = {
-        # Tipos
-        30: 'INT', 36: 'STRING', 42: 'CHAR', 48: 'FLOAT', 52: 'BOOLEANO',
-        # Operadores <*>
-        11: 'ASIGNACION', 12: 'OP_SUMA', 13: 'OP_RESTA', 14: 'OP_MULTIPLICACION',
-        15: 'OP_DIVISION', 16: 'OP_MODULO', 17: 'OP_MENOR_QUE', 21: 'OP_MAYOR_QUE',
-        22: 'OP_MENOR_IGUAL', 23: 'OP_DIFERENTE', 24: 'OP_IGUAL', 25: 'INCREMENTO',
-        26: 'DECREMENTO', 27: 'OP_MAYOR_IGUAL', 19: 'DELIMITADOR', 20: 'COMENTARIO_BLOQUE_INICIO',
+        # Tipos de datos
+        30: '<int', 
+        36: '<string', 
+        42: '<charal', 
+        48: '<bubble', 
+        52: '<hook',
+        # Operadores
+        11: '<=',      # Asignación
+        12: '<+',      # Suma
+        13: '<-',      # Resta
+        14: '<*',      # Multiplicación
+        15: '</',      # División
+        16: '<%',      # Módulo
+        17: '<<',      # Menor que
+        21: '<<>',     # Mayor que
+        22: '<<=',     # Menor o igual
+        23: '<!=',     # Diferente
+        24: '<==',     # Igual
+        25: '<++',     # Incremento
+        26: '<--',     # Decremento
+        27: '<<>=',    # Mayor o igual
+        19: '<D',      # Delimitador
+        20: 'COMENTARIO_BLOQUE_INICIO',
         # Palabras reservadas
-        56: 'MAIN', 60: 'IMPORT', 64: 'FUNCTION', 65: 'FOR', 71: 'FINALLY', 73: 'IF',
-        77: 'ELSE', 82: 'RETURN', 85: 'TRY', 90: 'CATCH', 95: 'WHILE', 101: 'PRINT',
-        106: 'ARRAY', 110: 'DICT',
+        56: 'fish',       # Main
+        60: 'IMPORT', 
+        64: 'fishtion',   # Function
+        65: 'fork',       # For
+        71: 'finally', 
+        73: 'if',
+        77: 'else', 
+        82: 'emerge',     # Return
+        85: 'try', 
+        90: 'catch', 
+        95: 'whale',      # While
+        101: 'splash',    # Print
+        106: 'ARRAY', 
+        110: 'DICT',
         # Símbolos
-        111: 'CORCHETE_IZQ', 112: 'CORCHETE_DER', 113: 'LLAVE_IZQ', 114: 'LLAVE_DER',
-        115: 'COMA', 116: 'PUNTO', 118: 'COMENTARIO_LINEA', 119: 'COMENTARIO_BLOQUE_FIN',
-        2: 'PAREN_IZQ', 3: 'PAREN_DER',
+        111: 'CORCHETE_IZQ', 
+        112: 'CORCHETE_DER', 
+        113: '{', 
+        114: '}',
+        115: ',', 
+        116: 'PUNTO', 
+        118: 'COMENTARIO_LINEA', 
+        119: 'COMENTARIO_BLOQUE_FIN',
+        2: '(', 
+        3: ')',
         # Operadores simples
-        1: 'OP', 7: 'OP', 8: 'OP', 9: 'OP',
-    # Literales
-    123: 'STRING',
+        1: 'OP', 
+        7: 'OP', 
+        8: 'OP', 
+        9: 'OP',
+        # Literales de string
+        123: 'STRING_LITERAL',
     }
     return mapping.get(state, 'NO RECONOCIDO')
