@@ -11,6 +11,7 @@ def process_tokens(self, input_text: str) -> list:
         buffer = ""
         i = 0
         n = len(input_text)
+        line = 1
 
         reserved_initials = {'f', 'i', 'e', 't', 'c', 'w', 's', 'a', 'd'}
 
@@ -45,6 +46,9 @@ def process_tokens(self, input_text: str) -> list:
             elif c in "+-*/=(){},[]<%>!D~":
                 category = c
             else:
+                # Manejar saltos de línea para llevar el conteo de líneas
+                if c == '\n':
+                    line += 1
                 i += 1
                 continue
 
@@ -72,7 +76,7 @@ def process_tokens(self, input_text: str) -> list:
                     i += 1
                     continue
             elif state == CHAR_END_STATE:
-                tokens.append((buffer, 'CHAR'))
+                tokens.append((buffer, 'CHAR_LITERAL', line))
                 buffer = ""
                 state = self.start_state
                 continue
@@ -84,10 +88,11 @@ def process_tokens(self, input_text: str) -> list:
                 while i < n and (is_alpha(input_text[i]) or is_digit(input_text[i])):
                     buffer += input_text[i]
                     i += 1
-                tokens.append((buffer, 'NO VALIDO'))
+                tokens.append((buffer, 'NO VALIDO', line))
                 buffer = ""
                 state = self.start_state
                 continue
+            
             if category in self.states[state]:
                 #print (f"Transición: {state} --{category}--> {self.states[state][category]}")
                 state = self.states[state][category]
@@ -102,15 +107,15 @@ def process_tokens(self, input_text: str) -> list:
                     continue
                 # Volcar token si hay uno aceptado
                 if buffer and state in self.accept_states:
-                    tokens.append((buffer, classify_state(state)))
+                    tokens.append((buffer, classify_state(state), line))
                 elif buffer:
-                    tokens.append((buffer, 'NO RECONOCIDO'))
+                    tokens.append((buffer, 'NO RECONOCIDO', line))
                 buffer = ""
                 state = self.start_state
                 continue
 
         if buffer and state in self.accept_states:
-            tokens.append((buffer, classify_state(state)))
+            tokens.append((buffer, classify_state(state), line))
         elif buffer:
-            tokens.append((buffer, 'NO RECONOCIDO'))
+            tokens.append((buffer, 'NO RECONOCIDO', line))
         return tokens

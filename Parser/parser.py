@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
+from Parser.ast import ASTNode
 
 
 @dataclass
@@ -19,11 +20,16 @@ class Parser:
         token_objects = []
         for i, token in enumerate(tokens):
             if isinstance(token, tuple):
-                lexeme, token_type = token
-                token_objects.append(Token(type=token_type, lexeme=lexeme, line=i+1))
+                # token puede venir como (lexeme, type) o (lexeme, type, line)
+                if len(token) == 3:
+                    lexeme, token_type, line = token
+                else:
+                    lexeme, token_type = token
+                    line = i + 1
+                token_objects.append(Token(type=token_type, lexeme=lexeme, line=line))
             else:
                 token_objects.append(token)
-        
+
         # Agregamos token de fin de entrada $
         self.tokens = token_objects + [Token(type='$', lexeme='$', line=-1)]
         self.pos = 0
@@ -54,21 +60,23 @@ class Parser:
     # ---------------------------------------------
     # Entrada principal
     # ---------------------------------------------
-    def parse(self) -> None:
-        self.program()
+    def parse(self) -> ASTNode:
+        ast = self.program()
         if self.current.type != '$':
             raise ParseError(
                 f"[Línea {self.current.line}] "
                 f"Tokens extra después de finalizar PROGRAM: '{self.current.type}'"
             )
+        return ast
 
     # ---------------------------------------------
     # PROGRAM → fish BLOCK
     # ---------------------------------------------
-    def program(self) -> None:
+    def program(self) -> ASTNode:
         if self.current.type == 'fish':
             self.match('fish')
-            self.block()
+            block_node = self.block()
+            return ASTNode('Program', children=[block_node], line=self.current.line)
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -78,12 +86,14 @@ class Parser:
     # ---------------------------------------------
     # BLOCK → { DECLS_AND_STMTS }
     # ---------------------------------------------
-    def block(self) -> None:
+    def block(self) -> ASTNode:
         if self.current.type == '{':
             self.match('{')
-            self.decls_and_stmts()
+            items = self.decls_and_stmts()
             if self.current.type == '}':
                 self.match('}')
+                node = ASTNode('Block', children=items, line=self.current.line)
+                return node
             else:
                 raise ParseError(
                     f"[Línea {self.current.line}] "
@@ -97,36 +107,27 @@ class Parser:
 
     # ---------------------------------------------
     # DECLS_AND_STMTS → ITEM DECLS_AND_STMTS | ε
-    # FIRST = { <int, <string, <charal, <bubble, <hook,
-    #           fishtion, if, whale, fork, try, splash, emerge, {, ident, ε }
-    # FOLLOW = { } }
     # ---------------------------------------------
-    def decls_and_stmts(self) -> None:
-        if self.check('<int', '<string', '<charal', '<bubble', '<hook',
-                      'fishtion', 'if', 'whale', 'fork', 'try',
-                      'splash', 'emerge', '{', 'ident'):
-            self.item()
-            self.decls_and_stmts()
-        elif self.current.type == '}':
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en DECLS_AND_STMTS"
-            )
+    def decls_and_stmts(self) -> List[ASTNode]:
+        items: List[ASTNode] = []
+        while self.check('<int', '<string', '<charal', '<bubble', '<hook',
+                         'fishtion', 'if', 'whale', 'fork', 'try',
+                         'splash', 'emerge', '{', 'ident'):
+            node = self.item()
+            items.append(node)
+        return items
 
     # ---------------------------------------------
     # ITEM → DECLARATION | FUNCTION_DEF | STATEMENT
     # ---------------------------------------------
-    def item(self) -> None:
+    def item(self) -> ASTNode:
         if self.check('<int', '<string', '<charal', '<bubble', '<hook'):
-            self.declaration()
+            return self.declaration()
         elif self.current.type == 'fishtion':
-            self.function_def()
+            return self.function_def()
         elif self.check('if', 'whale', 'fork', 'try', 'splash', 'emerge',
                         '{', 'ident'):
-            self.statement()
+            return self.statement()
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -136,11 +137,16 @@ class Parser:
     # ---------------------------------------------
     # DECLARATION → TYPE ident DECLARATION_TAIL
     # ---------------------------------------------
-    def declaration(self) -> None:
-        self.type_()
+    def declaration(self) -> ASTNode:
+        type_node = self.type_()
         if self.current.type == 'ident':
+            name = self.current.lexeme
             self.match('ident')
-            self.declaration_tail()
+            init = self.declaration_tail()
+            node = ASTNode('Declaration', value=name, children=[type_node], line=self.current.line)
+            if init:
+                node.add(init)
+            return node
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -150,12 +156,13 @@ class Parser:
     # ---------------------------------------------
     # DECLARATION_TAIL → <= EXPR <D
     # ---------------------------------------------
-    def declaration_tail(self) -> None:
+    def declaration_tail(self) -> ASTNode:
         if self.current.type == '<=':
             self.match('<=')
-            self.expr()
+            expr_node = self.expr()
             if self.current.type == '<D':
                 self.match('<D')
+                return ASTNode('Initializer', children=[expr_node], line=self.current.line)
             else:
                 raise ParseError(
                     f"[Línea {self.current.line}] "
@@ -170,9 +177,11 @@ class Parser:
     # ---------------------------------------------
     # TYPE → <int | <string | <charal | <bubble | <hook
     # ---------------------------------------------
-    def type_(self) -> None:
+    def type_(self) -> ASTNode:
         if self.check('<int', '<string', '<charal', '<bubble', '<hook'):
+            t = self.current.type
             self.advance()
+            return ASTNode('Type', value=t, line=self.current.line)
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -182,79 +191,80 @@ class Parser:
     # ---------------------------------------------
     # FUNCTION_DEF → fishtion ident ( PARAMS ) TYPE BLOCK
     # ---------------------------------------------
-    def function_def(self) -> None:
+    def function_def(self) -> ASTNode:
         self.match('fishtion')
+        if self.current.type != 'ident':
+            raise ParseError(f"[Línea {self.current.line}] Se esperaba nombre de funcion")
+        name = self.current.lexeme
         self.match('ident')
         self.match('(')
-        self.params()
+        params_node = self.params()
         self.match(')')
-        self.type_()
-        self.block()
+        ret_type = self.type_()
+        block_node = self.block()
+        node = ASTNode('FunctionDef', value=name, children=[params_node, ret_type, block_node], line=self.current.line)
+        return node
 
     # ---------------------------------------------
     # PARAMS → PARAM PARAMS' | ε
-    # FIRST(PARAMS) = { <int, <string, <charal, <bubble, <hook, ε }
-    # FOLLOW(PARAMS) = { ) }
     # ---------------------------------------------
-    def params(self) -> None:
+    def params(self) -> ASTNode:
+        params = []
         if self.check('<int', '<string', '<charal', '<bubble', '<hook'):
-            self.param()
-            self.params_p()
+            params.append(self.param())
+            params.extend(self.params_p())
         elif self.current.type == ')':
-            # ε
-            return
+            pass
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
                 "Token inesperado en PARAMS"
             )
+        return ASTNode('Params', children=params, line=self.current.line)
 
     # ---------------------------------------------
     # PARAMS' → , PARAM PARAMS' | ε
     # ---------------------------------------------
-    def params_p(self) -> None:
-        if self.current.type == ',':
+    def params_p(self) -> List[ASTNode]:
+        params = []
+        while self.current.type == ',':
             self.match(',')
-            self.param()
-            self.params_p()
-        elif self.current.type == ')':
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en PARAMS'"
-            )
+            params.append(self.param())
+        return params
 
     # ---------------------------------------------
     # PARAM → TYPE ident
     # ---------------------------------------------
-    def param(self) -> None:
-        self.type_()
+    def param(self) -> ASTNode:
+        t = self.type_()
+        if self.current.type != 'ident':
+            raise ParseError(f"[Línea {self.current.line}] Se esperaba identificador en PARAM")
+        name = self.current.lexeme
         self.match('ident')
+        return ASTNode('Param', value=name, children=[t], line=self.current.line)
 
     # ---------------------------------------------
     # STATEMENT → IF_ELSE | WHILE_LOOP | FOR_LOOP
     #           | TRY_CATCH | PRINT_STMT | RETURN_STMT
     #           | BLOCK | IDENT_STMT
     # ---------------------------------------------
-    def statement(self) -> None:
+    def statement(self) -> ASTNode:
         if self.current.type == 'if':
-            self.if_else()
+            return self.if_else()
         elif self.current.type == 'whale':
-            self.while_loop()
+            return self.while_loop()
         elif self.current.type == 'fork':
-            self.for_loop()
+            return self.for_loop()
         elif self.current.type == 'try':
-            self.try_catch()
+            return self.try_catch()
         elif self.current.type == 'splash':
-            self.print_stmt()
+            return self.print_stmt()
         elif self.current.type == 'emerge':
-            self.return_stmt()
+            return self.return_stmt()
         elif self.current.type == '{':
-            self.block()
+            return self.block()
         elif self.current.type == 'ident':
-            self.ident_stmt()
+            return self.ident_stmt()
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -264,123 +274,113 @@ class Parser:
     # ---------------------------------------------
     # IDENT_STMT → ident IDENT_TAIL
     # ---------------------------------------------
-    def ident_stmt(self) -> None:
+    def ident_stmt(self) -> ASTNode:
+        name = self.current.lexeme
         self.match('ident')
-        self.ident_tail()
-
-    # ---------------------------------------------
-    # IDENT_TAIL → ( ARGS ) <D
-    #            | <= EXPR <D
-    #            | <++ <D
-    #            | <-- <D
-    # ---------------------------------------------
-    def ident_tail(self) -> None:
+        # Distinguish call vs assign vs inc/dec
         if self.current.type == '(':
             self.match('(')
-            self.args()
+            args = self.args()
             self.match(')')
             self.match('<D')
+            return ASTNode('CallStmt', value=name, children=[args], line=self.current.line)
         elif self.current.type == '<=':
             self.match('<=')
-            self.expr()
+            expr = self.expr()
             self.match('<D')
+            return ASTNode('Assign', value=name, children=[expr], line=self.current.line)
         elif self.current.type == '<++':
             self.match('<++')
             self.match('<D')
+            return ASTNode('Inc', value=name, line=self.current.line)
         elif self.current.type == '<--':
             self.match('<--')
             self.match('<D')
+            return ASTNode('Dec', value=name, line=self.current.line)
         else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Forma inválida de IDENT_TAIL"
-            )
+            raise ParseError(f"[Línea {self.current.line}] Forma inválida de IDENT_STMT")
+
+    def ident_tail(self) -> None:
+        # Left for compatibility; not used now because ident_stmt handles cases
+        return None
 
     # ---------------------------------------------
     # ARGS → EXPR ARGS' | ε
-    # FIRST(ARGS) = { <+, <-, ident, NUM, STRING_LITERAL, CHAR_LITERAL, (, ε }
-    # FOLLOW(ARGS) = { ) }
     # ---------------------------------------------
-    def args(self) -> None:
+    def args(self) -> ASTNode:
+        args = []
         if self.check('<+', '<-', 'ident', 'NUM',
                       'STRING_LITERAL', 'CHAR_LITERAL', '('):
-            self.expr()
-            self.args_p()
+            args.append(self.expr())
+            args.extend(self.args_p())
         elif self.current.type == ')':
-            # ε
-            return
+            pass
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
                 "Token inesperado en ARGS"
             )
+        return ASTNode('Args', children=args, line=self.current.line)
 
     # ---------------------------------------------
     # ARGS' → , EXPR ARGS' | ε
     # ---------------------------------------------
-    def args_p(self) -> None:
-        if self.current.type == ',':
+    def args_p(self) -> List[ASTNode]:
+        args = []
+        while self.current.type == ',':
             self.match(',')
-            self.expr()
-            self.args_p()
-        elif self.current.type == ')':
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en ARGS'"
-            )
+            args.append(self.expr())
+        return args
 
     # ---------------------------------------------
     # IF_ELSE → if ( EXPR ) BLOCK else BLOCK
     # ---------------------------------------------
-    def if_else(self) -> None:
+    def if_else(self) -> ASTNode:
         self.match('if')
         self.match('(')
-        self.expr()
+        cond = self.expr()
         self.match(')')
-        self.block()
+        then_block = self.block()
         self.match('else')
-        self.block()
+        else_block = self.block()
+        return ASTNode('If', children=[cond, then_block, else_block], line=self.current.line)
 
     # ---------------------------------------------
     # WHILE_LOOP → whale ( EXPR ) BLOCK
     # ---------------------------------------------
-    def while_loop(self) -> None:
+    def while_loop(self) -> ASTNode:
         self.match('whale')
         self.match('(')
-        self.expr()
+        cond = self.expr()
         self.match(')')
-        self.block()
+        block = self.block()
+        return ASTNode('While', children=[cond, block], line=self.current.line)
 
     # ---------------------------------------------
     # FOR_LOOP → fork ( FOR_INIT <D FOR_COND <D FOR_STEP ) BLOCK
     # ---------------------------------------------
-    def for_loop(self) -> None:
+    def for_loop(self) -> ASTNode:
         self.match('fork')
         self.match('(')
-        self.for_init()
+        init = self.for_init()
         self.match('<D')
-        self.for_cond()
+        cond = self.for_cond()
         self.match('<D')
-        self.for_step()
+        step = self.for_step()
         self.match(')')
-        self.block()
+        block = self.block()
+        return ASTNode('For', children=[init or ASTNode('Empty'), cond or ASTNode('Empty'), step or ASTNode('Empty'), block], line=self.current.line)
 
     # ---------------------------------------------
     # FOR_INIT → DECL_NO_DELIM | ASSIGN_NO_DELIM | ε
-    # FIRST(FOR_INIT) = { <int, <string, <charal, <bubble, <hook, ident, ε }
-    # FOLLOW(FOR_INIT) = { <D }
     # ---------------------------------------------
-    def for_init(self) -> None:
+    def for_init(self) -> Optional[ASTNode]:
         if self.check('<int', '<string', '<charal', '<bubble', '<hook'):
-            self.decl_no_delim()
+            return self.decl_no_delim()
         elif self.current.type == 'ident':
-            self.assign_no_delim()
+            return self.assign_no_delim()
         elif self.current.type == '<D':
-            # ε
-            return
+            return None
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -389,16 +389,13 @@ class Parser:
 
     # ---------------------------------------------
     # FOR_COND → EXPR | ε
-    # FIRST(FOR_COND) = FIRST(EXPR) ∪ { ε }
-    # FOLLOW(FOR_COND) = { <D }
     # ---------------------------------------------
-    def for_cond(self) -> None:
+    def for_cond(self) -> Optional[ASTNode]:
         if self.check('<+', '<-', 'ident', 'NUM',
                       'STRING_LITERAL', 'CHAR_LITERAL', '('):
-            self.expr()
+            return self.expr()
         elif self.current.type == '<D':
-            # ε
-            return
+            return None
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -407,16 +404,16 @@ class Parser:
 
     # ---------------------------------------------
     # FOR_STEP → ident FOR_STEP_TAIL | ε
-    # FIRST(FOR_STEP) = { ident, ε }
-    # FOLLOW(FOR_STEP) = { ) }
     # ---------------------------------------------
-    def for_step(self) -> None:
+    def for_step(self) -> Optional[ASTNode]:
         if self.current.type == 'ident':
+            name = self.current.lexeme
             self.match('ident')
-            self.for_step_tail()
+            tail = self.for_step_tail()
+            node = ASTNode('ForStep', value=name, children=[tail] if tail else [], line=self.current.line)
+            return node
         elif self.current.type == ')':
-            # ε
-            return
+            return None
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -425,16 +422,18 @@ class Parser:
 
     # ---------------------------------------------
     # FOR_STEP_TAIL → <++ | <-- | <= EXPR
-    # FIRST(FOR_STEP_TAIL) = { <++, <--, <= }
     # ---------------------------------------------
-    def for_step_tail(self) -> None:
+    def for_step_tail(self) -> ASTNode:
         if self.current.type == '<++':
             self.match('<++')
+            return ASTNode('Postfix', value='<++', line=self.current.line)
         elif self.current.type == '<--':
             self.match('<--')
+            return ASTNode('Postfix', value='<--', line=self.current.line)
         elif self.current.type == '<=':
             self.match('<=')
-            self.expr()
+            expr = self.expr()
+            return ASTNode('AssignTo', children=[expr], line=self.current.line)
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -444,24 +443,30 @@ class Parser:
     # ---------------------------------------------
     # DECL_NO_DELIM → TYPE ident <= EXPR
     # ---------------------------------------------
-    def decl_no_delim(self) -> None:
-        self.type_()
+    def decl_no_delim(self) -> ASTNode:
+        t = self.type_()
+        if self.current.type != 'ident':
+            raise ParseError(f"[Línea {self.current.line}] Se esperaba ident en DECL_NO_DELIM")
+        name = self.current.lexeme
         self.match('ident')
         self.match('<=')
-        self.expr()
+        expr = self.expr()
+        return ASTNode('Declaration', value=name, children=[t, expr], line=self.current.line)
 
     # ---------------------------------------------
     # ASSIGN_NO_DELIM → ident <= EXPR
     #                  | ident <--
-    # (Versión final del PDF)
     # ---------------------------------------------
-    def assign_no_delim(self) -> None:
+    def assign_no_delim(self) -> ASTNode:
+        name = self.current.lexeme
         self.match('ident')
         if self.current.type == '<=':
             self.match('<=')
-            self.expr()
+            expr = self.expr()
+            return ASTNode('Assign', value=name, children=[expr], line=self.current.line)
         elif self.current.type == '<--':
             self.match('<--')
+            return ASTNode('Dec', value=name, line=self.current.line)
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -471,174 +476,118 @@ class Parser:
     # ---------------------------------------------
     # TRY_CATCH → try BLOCK catch BLOCK TRY_CATCH_TAIL
     # ---------------------------------------------
-    def try_catch(self) -> None:
+    def try_catch(self) -> ASTNode:
         self.match('try')
-        self.block()
+        try_block = self.block()
         self.match('catch')
-        self.block()
-        self.try_catch_tail()
+        catch_block = self.block()
+        tail = self.try_catch_tail()
+        node = ASTNode('TryCatch', children=[try_block, catch_block], line=self.current.line)
+        if tail:
+            node.add(tail)
+        return node
 
     # ---------------------------------------------
     # TRY_CATCH_TAIL → finally BLOCK | ε
-    # FIRST = { finally, ε }
     # ---------------------------------------------
-    def try_catch_tail(self) -> None:
+    def try_catch_tail(self) -> Optional[ASTNode]:
         if self.current.type == 'finally':
             self.match('finally')
-            self.block()
+            finally_block = self.block()
+            return ASTNode('Finally', children=[finally_block], line=self.current.line)
         else:
-            # ε
-            return
+            return None
 
     # ---------------------------------------------
     # PRINT_STMT → splash ( EXPR ) <D
     # ---------------------------------------------
-    def print_stmt(self) -> None:
+    def print_stmt(self) -> ASTNode:
         self.match('splash')
         self.match('(')
-        self.expr()
+        expr = self.expr()
         self.match(')')
         self.match('<D')
+        return ASTNode('Print', children=[expr], line=self.current.line)
 
     # ---------------------------------------------
     # RETURN_STMT → emerge EXPR <D
     # ---------------------------------------------
-    def return_stmt(self) -> None:
+    def return_stmt(self) -> ASTNode:
         self.match('emerge')
-        self.expr()
+        expr = self.expr()
         self.match('<D')
+        return ASTNode('Return', children=[expr], line=self.current.line)
 
     # ---------------------------------------------
     # EXPR → EQUALITY
     # ---------------------------------------------
-    def expr(self) -> None:
-        self.equality()
+    def expr(self) -> ASTNode:
+        return self.equality()
 
     # ---------------------------------------------
-    # EQUALITY → RELATIONAL EQUALITY'
+    # EQUALITY → RELATIONAL ( (<==|<!=) RELATIONAL )*
     # ---------------------------------------------
-    def equality(self) -> None:
-        self.relational()
-        self.equality_p()
-
-    # ---------------------------------------------
-    # EQUALITY' → <== RELATIONAL EQUALITY'
-    #           | <!= RELATIONAL EQUALITY'
-    #           | ε
-    # FOLLOW(EQUALITY') = { ), <D, , }
-    # ---------------------------------------------
-    def equality_p(self) -> None:
-        if self.current.type == '<==':
-            self.match('<==')
-            self.relational()
-            self.equality_p()
-        elif self.current.type == '<!=':
-            self.match('<!=')
-            self.relational()
-            self.equality_p()
-        elif self.check(')', '<D', ','):
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en EQUALITY'"
-            )
-
-    # ---------------------------------------------
-    # RELATIONAL → ADD RELATIONAL'
-    # ---------------------------------------------
-    def relational(self) -> None:
-        self.add()
-        self.relational_p()
-
-    # ---------------------------------------------
-    # RELATIONAL' → << ADD RELATIONAL'
-    #             | <<> ADD RELATIONAL'
-    #             | <<= ADD RELATIONAL'
-    #             | <<>= ADD RELATIONAL'
-    #             | ε
-    # FOLLOW(RELATIONAL') = { <==, <!=, ), <D, , }
-    # ---------------------------------------------
-    def relational_p(self) -> None:
-        if self.current.type in ('<<', '<<>', '<<=', '<<>='):
+    def equality(self) -> ASTNode:
+        node = self.relational()
+        while self.current.type in ('<==', '<!='):
+            op = self.current.type
             self.advance()
-            self.add()
-            self.relational_p()
-        elif self.current.type in ('<==', '<!=', ')', '<D', ','):
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en RELATIONAL'"
-            )
+            right = self.relational()
+            node = ASTNode('BinaryOp', value=op, children=[node, right], line=self.current.line)
+        return node
 
     # ---------------------------------------------
-    # ADD → MUL ADD'
+    # RELATIONAL → ADD ( << | <<> | <<= | <<>= )*
     # ---------------------------------------------
-    def add(self) -> None:
-        self.mul()
-        self.add_p()
-
-    # ---------------------------------------------
-    # ADD' → <+ MUL ADD' | <- MUL ADD' | ε
-    # FOLLOW(ADD') = { <<, <<>, <<=, <<>=, <==, <!=, ), <D, , }
-    # ---------------------------------------------
-    def add_p(self) -> None:
-        if self.current.type in ('<+', '<-'):
+    def relational(self) -> ASTNode:
+        node = self.add()
+        while self.current.type in ('<<', '<<>', '<<=', '<<>='):
+            op = self.current.type
             self.advance()
-            self.mul()
-            self.add_p()
-        elif self.current.type in ('<<', '<<>', '<<=', '<<>=',
-                                   '<==', '<!=', ')', '<D', ','):
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en ADD'"
-            )
+            right = self.add()
+            node = ASTNode('BinaryOp', value=op, children=[node, right], line=self.current.line)
+        return node
 
     # ---------------------------------------------
-    # MUL → UNARY MUL'
+    # ADD → MUL ( (<+|<-) MUL )*
     # ---------------------------------------------
-    def mul(self) -> None:
-        self.unary()
-        self.mul_p()
-
-    # ---------------------------------------------
-    # MUL' → <* UNARY MUL' | </ UNARY MUL' | <% UNARY MUL' | ε
-    # FOLLOW(MUL') = { <+, <-, <<, <<>, <<=, <<>=, <==, <!=, ), <D, , }
-    # ---------------------------------------------
-    def mul_p(self) -> None:
-        if self.current.type in ('<*', '</', '<%'):
+    def add(self) -> ASTNode:
+        node = self.mul()
+        while self.current.type in ('<+', '<-'):
+            op = self.current.type
             self.advance()
-            self.unary()
-            self.mul_p()
-        elif self.current.type in ('<+', '<-', '<<', '<<>', '<<=', '<<>=',
-                                   '<==', '<!=', ')', '<D', ','):
-            # ε
-            return
-        else:
-            raise ParseError(
-                f"[Línea {self.current.line}] "
-                "Token inesperado en MUL'"
-            )
+            right = self.mul()
+            node = ASTNode('BinaryOp', value=op, children=[node, right], line=self.current.line)
+        return node
+
+    # ---------------------------------------------
+    # MUL → UNARY ( (<*|</|<%) UNARY )*
+    # ---------------------------------------------
+    def mul(self) -> ASTNode:
+        node = self.unary()
+        while self.current.type in ('<*', '</', '<%'):
+            op = self.current.type
+            self.advance()
+            right = self.unary()
+            node = ASTNode('BinaryOp', value=op, children=[node, right], line=self.current.line)
+        return node
 
     # ---------------------------------------------
     # UNARY → <+ UNARY | <- UNARY | POSTFIX
     # ---------------------------------------------
-    def unary(self) -> None:
+    def unary(self) -> ASTNode:
         if self.current.type == '<+':
+            op = self.current.type
             self.match('<+')
-            self.unary()
+            operand = self.unary()
+            return ASTNode('UnaryOp', value=op, children=[operand], line=self.current.line)
         elif self.current.type == '<-':
+            op = self.current.type
             self.match('<-')
-            self.unary()
-        elif self.check('ident', 'NUM', 'STRING_LITERAL',
-                        'CHAR_LITERAL', '('):
-            self.postfix()
+            operand = self.unary()
+            return ASTNode('UnaryOp', value=op, children=[operand], line=self.current.line)
+        elif self.check('ident', 'NUM', 'STRING_LITERAL', 'CHAR_LITERAL', '('):
+            return self.postfix()
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
@@ -646,58 +595,53 @@ class Parser:
             )
 
     # ---------------------------------------------
-    # POSTFIX → PRIMARY POSTFIX'
+    # POSTFIX → PRIMARY ( <++ | <-- )*
     # ---------------------------------------------
-    def postfix(self) -> None:
-        self.primary()
-        self.postfix_p()
-
-    # ---------------------------------------------
-    # POSTFIX' → <++ POSTFIX' | <-- POSTFIX' | ε
-    # ---------------------------------------------
-    def postfix_p(self) -> None:
-        if self.current.type in ('<++', '<--'):
+    def postfix(self) -> ASTNode:
+        node = self.primary()
+        while self.current.type in ('<++', '<--'):
+            op = self.current.type
             self.advance()
-            self.postfix_p()
-        else:
-            # ε (cuando viene algo en FOLLOW: operadores binarios, ), <D, , ...)
-            return
+            node = ASTNode('PostfixOp', value=op, children=[node], line=self.current.line)
+        return node
 
     # ---------------------------------------------
-    # PRIMARY → ident PRIMARY_ID
-    #         | NUM
-    #         | STRING_LITERAL
-    #         | CHAR_LITERAL
-    #         | ( EXPR )
+    # PRIMARY → ident (ARGS)? | NUM | STRING_LITERAL | CHAR_LITERAL | ( EXPR )
     # ---------------------------------------------
-    def primary(self) -> None:
+    def primary(self) -> ASTNode:
         if self.current.type == 'ident':
+            name = self.current.lexeme
             self.match('ident')
-            self.primary_id()
+            if self.current.type == '(':
+                self.match('(')
+                args = self.args()
+                self.match(')')
+                return ASTNode('Call', value=name, children=[args], line=self.current.line)
+            else:
+                return ASTNode('Var', value=name, line=self.current.line)
         elif self.current.type == 'NUM':
+            val = self.current.lexeme
             self.match('NUM')
+            return ASTNode('Num', value=val, line=self.current.line)
         elif self.current.type == 'STRING_LITERAL':
+            val = self.current.lexeme
             self.match('STRING_LITERAL')
+            return ASTNode('String', value=val, line=self.current.line)
         elif self.current.type == 'CHAR_LITERAL':
+            val = self.current.lexeme
             self.match('CHAR_LITERAL')
+            return ASTNode('Char', value=val, line=self.current.line)
         elif self.current.type == '(':
             self.match('(')
-            self.expr()
+            node = self.expr()
             self.match(')')
+            return node
         else:
             raise ParseError(
                 f"[Línea {self.current.line}] "
                 "Token inesperado en PRIMARY"
             )
 
-    # ---------------------------------------------
-    # PRIMARY_ID → ( ARGS ) | ε
-    # ---------------------------------------------
     def primary_id(self) -> None:
-        if self.current.type == '(':
-            self.match('(')
-            self.args()
-            self.match(')')
-        else:
-            # ε
-            return
+        # deprecated; handled in primary
+        return None

@@ -3,6 +3,8 @@ from Helpers.cleaner import clean_input
 from Helpers.transitions import transitions, accept_states
 from Helpers.reader import reader
 from Parser.parser import Parser
+from Parser.ast import pretty_print
+from Parser.semantic import SemanticAnalyzer
 
 class Automaton:
     def __init__(self, transitions: list, accept_states: set):
@@ -29,5 +31,16 @@ if not tokens:
 #     print("Token:", token)
     
 parser = Parser(tokens)
-parser.parse()
-print("Parsed Output:", "Parsing completed successfully")
+ast = parser.parse()
+print("Parsed Output:")
+pretty_print(ast)
+
+# Analizador semántico
+analyzer = SemanticAnalyzer()
+errors = analyzer.analyze(ast)
+if errors:
+    print('\nSemantic Errors:')
+    for e in errors:
+        print('-', e)
+else:
+    print('\nSemantic: OK')

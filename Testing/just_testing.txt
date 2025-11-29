@@ -10,7 +10,9 @@ fish {                       ~~ Inicio del programa principal ~~
         splash(contador)<D
         contador <++<D                         ~~ Incremento ~~
         <int contador2 <= 5<D
+        splash(contador2)<D
     }
+
 
     if (contador <<> 5) {                      ~~ Condicional ~~
         splash("El contador es mayor que 5")<D

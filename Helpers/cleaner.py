@@ -10,6 +10,7 @@ def _remove_comments(input_text: str) -> str:
 def clean_input(input_text: str) -> str:
      # 1) Quitar comentarios primero
      text = _remove_comments(input_text)
-     # 2) Luego eliminar todos los espacios en blanco
-     text = ''.join(ch for ch in text if not ch.isspace())
+     # 2) Normalizar saltos de línea y conservarlos para conteo de líneas en el parser
+     #    Dejamos espacios/tabs intactos (el tokenizer los ignorará). Sustituimos CRLF por LF.
+     text = text.replace('\r\n', '\n').replace('\r', '\n')
      return text
