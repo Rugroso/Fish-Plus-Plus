@@ -21,6 +21,7 @@ class SemanticAnalyzer:
         self.current_function: Optional[Symbol] = None
 
     def push_scope(self) -> None:
+        # print("Current scopes:", self.scopes)
         self.scopes.append({})
 
     def pop_scope(self) -> None:
@@ -32,6 +33,7 @@ class SemanticAnalyzer:
             self.push_scope()
         scope = self.scopes[-1]
         if name in scope:
+            # print("Current scopes at error:", self.scopes)W
             self.errors.append(f"[Línea {node.line}] Variable '{name}' ya declarada en este ámbito")
         scope[name] = Symbol(name, typ, node)
 
@@ -59,6 +61,7 @@ class SemanticAnalyzer:
 
     # ----------------------- visitors -----------------------
     def visit(self, node: ASTNode) -> Optional[str]:
+        print(f"Visiting node: {node.kind} (line {node.line})")
         method = getattr(self, f"visit_{node.kind}", self.generic_visit)
         return method(node)
 
@@ -202,7 +205,6 @@ class SemanticAnalyzer:
         self.visit(body)
 
     def visit_ForStep(self, node: ASTNode) -> None:
-        # children may contain assign/postfix
         if node.children:
             self.visit(node.children[0])
 
@@ -233,18 +235,6 @@ class SemanticAnalyzer:
             self.errors.append(f"[Línea {node.line}] Variable '{node.value}' no declarada")
             return None
         return sym.type
-
-    def visit_Num(self, node: ASTNode) -> str:
-        return '<int'
-
-    def visit_String(self, node: ASTNode) -> str:
-        return '<string'
-
-    def visit_Char(self, node: ASTNode) -> str:
-        return '<charal'
-
-    def visit_Empty(self, node: ASTNode) -> None:
-        return None
 
     # ----------------------- helpers -----------------------
     def type_compatible(self, expected: Optional[str], given: Optional[str]) -> bool:

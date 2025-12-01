@@ -1,6 +1,6 @@
 # Fish++
 
-Fish++ is a custom programming language project (based on Fish Project). This repository contains the complete implementation of a lexical analyzer (tokenizer) and syntax analyzer (parser) for the Fish++ programming language.
+Fish++ is a custom programming-language project (inspired by the Fish Project). This repository implements a tokenizer (lexical analyzer), a parser (syntax analyzer) and basic semantic components for the Fish++ language.
 
 ## Project Structure
 
@@ -9,17 +9,19 @@ Fish++_Parser/
 ├── main.py                # Main entry point for the program
 ├── README.md              # This file
 ├── Helpers/               # Helper modules for tokenizing and processing
-│   ├── cleaner.py         # Input cleaning utilities
+│   ├── cleaner.py         # Input cleaning and comment removal
 │   ├── reader.py          # File reading utilities
-│   ├── symbolsTable.py    # Symbol table management
-│   ├── tokenizerHelpers.py # Token classification and state management
+│   ├── symbolsTable.py    # Symbol table management (semantic help)
+│   ├── tokenizerHelpers.py# Token classification and state utilities
 │   ├── transitions.py     # Automaton transitions and accept states
 │   └── __pycache__/
-├── Parser/                # Parser implementation
+├── Parser/                # Parser and semantic analysis
+│   ├── ast.py             # AST node definitions
 │   ├── parser.py          # Recursive descent parser
+│   ├── semantic.py        # Semantic checks and symbol resolution
 │   └── __pycache__/
 ├── Tokens/                # Tokenizer implementation
-│   ├── tokenizer.py       # Lexical analyzer
+│   ├── tokenizer.py       # Lexical analyzer (finite automaton)
 │   └── __pycache__/
 ├── Testing/               # Test files and examples
 │   └── just_testing.txt   # Sample Fish++ code
@@ -27,72 +29,77 @@ Fish++_Parser/
 
 ## Features
 
-- **Lexical Analysis**: Complete tokenizer with support for:
-  - Keywords: `fish`, `fishtion`, `if`, `else`, `whale`, `fork`, `try`, `catch`, `finally`, `splash`, `emerge`
-  - Data types: `<int`, `<string`, `<charal`, `<bubble`, `<hook`
-  - Operators: `<+`, `<-`, `<*`, `</`, `<%`, `<=`, `<==`, `<!=`, `<<`, `<<>`, `<<=`, `<<>=`, `<++`, `<--`
-  - Literals: numbers, strings, characters
-  - Symbols: `{`, `}`, `(`, `)`, `,`, `<D`
+- Lexical analysis with a finite-state tokenizer supporting:
+    - Keywords: `fish`, `fishtion`, `if`, `else`, `whale`, `fork`, `try`, `catch`, `finally`, `splash`, `emerge`
+    - Data types: `<int`, `<string`, `<charal`, `<bubble`, `<hook`
+    - Operators and punctuators used by the language
+    - Literals: numbers, strings, characters
 
-- **Syntax Analysis**: Recursive descent parser supporting:
-  - Function declarations
-  - Variable declarations and assignments
-  - Control structures (if-else, while, for loops)
-  - Exception handling (try-catch-finally)
-  - Expressions with operator precedence
-  - Print and return statements
+- Syntax analysis (recursive-descent parser) supporting:
+    - Function declarations and calls
+    - Variable declarations and assignments
+    - Control structures (if/else, loops)
+    - Exception-handling constructs (try/catch/finally)
+    - Expressions with operator precedence
 
-## How to Run
+- Basic semantic analysis: AST construction and symbol-table checks
 
-1. Make sure you have Python 3.12 or higher installed.
-2. Run the main program:
+## Requirements
+
+- Python 3.8+ (the code runs fine on modern 3.x interpreters). Use `python3 --version` to verify.
+
+## Quickstart — Run locally
+
+1. (Optional) Create and activate a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+2. Run the main program (it uses the sample in `Testing/just_testing.txt` by default):
 
 ```bash
 python3 main.py
 ```
 
-The program will:
-1. Read the test file from `Testing/just_testing.txt`
-2. Clean and tokenize the input
-3. Parse the token stream
-4. Display "Parsing completed successfully" if the code is syntactically correct
+Expected behaviour:
+- The program reads `Testing/just_testing.txt`, cleans the input, tokenizes it, parses the token stream and performs basic semantic checks.
+- If parsing succeeds, you should see a success message or no fatal errors printed to stdout.
 
-## Language Syntax Example
+## Running a different file
+
+Open `main.py` to see the input selection logic, or modify it to load another test file. You can also import the tokenizer or parser from `Tokens/tokenizer.py` and `Parser/parser.py` for programmatic use.
+
+## Example Fish++ snippet
 
 ```fish
 fish {
-    fishtion sumar(<int a, <int b) <int {
-        emerge a <+ b<D
-    }
+        fishtion sumar(<int a, <int b) <int {
+                emerge a <+ b<D
+        }
 
-    <int contador <= 0<D
-    whale (contador << 5) {
-        splash("Iteración: ")<D
-        contador <++<D
-    }
-
-    if (contador <<> 5) {
-        splash("Mayor que 5")<D
-    } else {
-        splash("No mayor que 5")<D
-    }
+        <int contador <= 0<D
+        whale (contador << 5) {
+                splash("Iteración: ")<D
+                contador <++<D
+        }
 }
 ```
 
-## Main Components
+## Main components reference
 
-- **main.py**: Entry point that orchestrates tokenization and parsing
-- **Parser/parser.py**: Implements recursive descent parser with error reporting
-- **Tokens/tokenizer.py**: Finite automaton-based lexical analyzer
-- **Helpers/tokenizerHelpers.py**: Token classification and state mapping
-- **Helpers/transitions.py**: Automaton transition table and accept states
-- **Helpers/cleaner.py**: Input preprocessing and comment removal
-- **Testing/**: Sample Fish++ programs for testing
+- `main.py`: program entry point — orchestration for cleaning, tokenizing and parsing
+- `Parser/ast.py`: AST node definitions used by the parser and semantic analyzer
+- `Parser/parser.py`: recursive-descent parser implementation
+- `Parser/semantic.py`: semantic checks and symbol-table interactions
+- `Tokens/tokenizer.py`: finite-automaton based lexical analyzer
+- `Helpers/`: helper modules (cleaner, reader, tokenizer helpers, transitions, symbol table)
 
 ## Contributing
 
-Feel free to fork this repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome. Please open an issue to discuss larger changes before submitting a pull request.
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is licensed under the MIT License.
