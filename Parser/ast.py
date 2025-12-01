@@ -11,6 +11,7 @@ class ASTNode:
 
     def add(self, node: 'ASTNode') -> None:
         if node is not None:
+            #print(f"Adding child node: {node.kind} (line {node.line})")
             self.children.append(node)
 
 

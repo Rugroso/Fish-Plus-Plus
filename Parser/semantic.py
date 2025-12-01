@@ -21,15 +21,17 @@ class SemanticAnalyzer:
         self.current_function: Optional[Symbol] = None
 
     def push_scope(self) -> None:
-        # print("Current scopes:", self.scopes)
+        #print("Current scopes:", self.scopes)
         self.scopes.append({})
 
     def pop_scope(self) -> None:
         if self.scopes:
+            #print("Popping scope:", self.scopes[-1])
             self.scopes.pop()
 
     def declare_var(self, name: str, typ: str, node: ASTNode) -> None:
         if not self.scopes:
+            print("No hay ámbitos disponibles para declarar variables.")
             self.push_scope()
         scope = self.scopes[-1]
         if name in scope:
@@ -61,7 +63,7 @@ class SemanticAnalyzer:
 
     # ----------------------- visitors -----------------------
     def visit(self, node: ASTNode) -> Optional[str]:
-        print(f"Visiting node: {node.kind} (line {node.line})")
+        #print(f"Visiting node: {node.kind} (line {node.line})")
         method = getattr(self, f"visit_{node.kind}", self.generic_visit)
         return method(node)
 
@@ -118,7 +120,7 @@ class SemanticAnalyzer:
         self.current_function = prev_func
 
     def visit_Declaration(self, node: ASTNode) -> None:
-        # node.value = name, children = [Type, maybe Initializer or expr]
+        # node.value = name, children = [Type, Initializer or expr]
         name = node.value
         tnode = node.children[0]
         typ = tnode.value
@@ -235,6 +237,18 @@ class SemanticAnalyzer:
             self.errors.append(f"[Línea {node.line}] Variable '{node.value}' no declarada")
             return None
         return sym.type
+
+    def visit_Num(self, node: ASTNode) -> Optional[str]:
+        return '<int'
+
+    def visit_String(self, node: ASTNode) -> Optional[str]:
+        return '<string'
+
+    def visit_Char(self, node: ASTNode) -> Optional[str]:
+        return '<charal'
+
+    def visit_Empty(self, node: ASTNode) -> Optional[str]:
+        return None
 
     # ----------------------- helpers -----------------------
     def type_compatible(self, expected: Optional[str], given: Optional[str]) -> bool:
