@@ -333,7 +333,8 @@ class Parser:
         return args
 
     # ---------------------------------------------
-    # IF_ELSE → if ( EXPR ) BLOCK else BLOCK
+    # IF_ELSE → if ( EXPR ) BLOCK ELSE_PART
+    # ELSE_PART → else BLOCK | ε
     # ---------------------------------------------
     def if_else(self) -> ASTNode:
         self.match('if')
@@ -341,9 +342,22 @@ class Parser:
         cond = self.expr()
         self.match(')')
         then_block = self.block()
-        self.match('else')
-        else_block = self.block()
-        return ASTNode('If', children=[cond, then_block, else_block], line=self.current.line)
+        else_block = self.else_part()
+        
+        if else_block:
+            return ASTNode('If', children=[cond, then_block, else_block], line=self.current.line)
+        else:
+            return ASTNode('If', children=[cond, then_block], line=self.current.line)
+    
+    # ---------------------------------------------
+    # ELSE_PART → else BLOCK | ε
+    # ---------------------------------------------
+    def else_part(self) -> Optional[ASTNode]:
+        if self.current.type == 'else':
+            self.match('else')
+            return self.block()
+        else:
+            return None
 
     # ---------------------------------------------
     # WHILE_LOOP → whale ( EXPR ) BLOCK

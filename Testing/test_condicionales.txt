@@ -2,13 +2,12 @@ fish {                       ~~ Pruebas de estructuras condicionales ~~
 
     splash("=== CONDICIONALES SIMPLES ===")<D
     
-    <int x <= 15<D
+    <int x <= 15<
     
     if (x <<> 10) {
         splash("15 es mayor que 10")<D
-    } else {
-        splash("15 es mayor que 10")<
     }
 
+    
 }
 

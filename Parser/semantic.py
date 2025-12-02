@@ -31,7 +31,6 @@ class SemanticAnalyzer:
 
     def declare_var(self, name: str, typ: str, node: ASTNode) -> None:
         if not self.scopes:
-            print("No hay ámbitos disponibles para declarar variables.")
             self.push_scope()
         scope = self.scopes[-1]
         if name in scope:
@@ -187,7 +186,9 @@ class SemanticAnalyzer:
         if cond_type is None:
             pass
         self.visit(node.children[1])
-        self.visit(node.children[2])
+        # El else es opcional (puede tener 2 o 3 hijos)
+        if len(node.children) > 2:
+            self.visit(node.children[2])
 
     def visit_While(self, node: ASTNode) -> None:
         self.visit(node.children[0])
