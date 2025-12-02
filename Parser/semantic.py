@@ -34,7 +34,7 @@ class SemanticAnalyzer:
             self.push_scope()
         scope = self.scopes[-1]
         if name in scope:
-            # print("Current scopes at error:", self.scopes)W
+            # print("Current scopes at error:", self.scopes)
             self.errors.append(f"[Línea {node.line}] Variable '{name}' ya declarada en este ámbito")
         scope[name] = Symbol(name, typ, node)
 

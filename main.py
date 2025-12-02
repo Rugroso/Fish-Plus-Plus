@@ -39,7 +39,7 @@ pretty_print(ast)
 analyzer = SemanticAnalyzer()
 errors = analyzer.analyze(ast)
 # print ("scopes", analyzer.scopes)
-print ("Functions", analyzer.functions)
+# print ("Functions", analyzer.functions)
 
 if errors:
     print('\nSemantic Errors:')
