@@ -1,3 +1,5 @@
 fish {
-	<int numero <= "texto"<D
+	<string texto <= "texto"<D
+	<int numero <= 5 <D
+	numero <= texto<D
 }

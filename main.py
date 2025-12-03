@@ -21,29 +21,41 @@ class Automaton:
 
 automaton = Automaton(transitions, accept_states)
 
-raw = reader('Testing/just_testing.txt')
+for i in range(3):
+    if i == 0:
+        # Un test rapido mostrando un buen funcionamiento general
+        print("Test General (Funciona bien)...")
+        raw = reader('Testing/just_testing.txt')
+    elif i == 1:
+        # Un test rapido mostrando funcionamiento de un error semántico
+        print("Aqui se debe presentar un error semántico (error en asignacion, tipos distintos)...")
+        raw = reader('Testing/Small/test_invalid_type_mismatch.txt')
+    else:
+        # Un test rapido mostrando funcionamiento de un error sintáctico
+        print("Aqui se debe presentar un error sintáctico (falta el main, es decir fish)...")
+        raw = reader('Testing/Small/test_invalid_no_fish.txt')
+    text = clean_input(raw)
+    tokens = process_tokens(automaton, text)
+    if not tokens:
+        pass
+    for token in tokens:
+        print("Token:", token)
+        
+    parser = Parser(tokens)
+    ast = parser.parse()
+    print("Parsed Output:")
+    pretty_print(ast)
 
-text = clean_input(raw)
-tokens = process_tokens(automaton, text)
-if not tokens:
-    pass
-# for token in tokens:
-#     print("Token:", token)
-    
-parser = Parser(tokens)
-ast = parser.parse()
-print("Parsed Output:")
-pretty_print(ast)
+    # Analizador semántico
+    analyzer = SemanticAnalyzer()
+    errors = analyzer.analyze(ast)
+    # print ("scopes", analyzer.scopes)
+    # print ("Functions", analyzer.functions)
 
-# Analizador semántico
-analyzer = SemanticAnalyzer()
-errors = analyzer.analyze(ast)
-# print ("scopes", analyzer.scopes)
-# print ("Functions", analyzer.functions)
-
-if errors:
-    print('\nSemantic Errors:')
-    for e in errors:
-        print('-', e)
-else:
-    print('\nSemantic: OK')
+    if errors:
+        print('\nSemantic Errors:')
+        for e in errors:
+            print('-', e)
+    else:
+        print('\nSemantic: OK')
+        
