@@ -1,0 +1,4 @@
+fish {
+	<int numero <= 42<D
+	splash("Hola mundo")<D
+}

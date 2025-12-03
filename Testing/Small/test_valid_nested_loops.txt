@@ -1,0 +1,8 @@
+fish {
+	fork (<int i <= 0<D i << 3<D i<++) {
+		whale (i << 2) {
+			splash("Anidado")<D
+			i<++<D
+		}
+	}
+}

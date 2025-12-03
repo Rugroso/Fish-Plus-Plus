@@ -1,0 +1,5 @@
+fish {
+	fork (<int i <= 0<D i << 5<D i<++) {
+		splash("Iteración de fork")<D
+	}
+}

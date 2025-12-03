@@ -1,0 +1,4 @@
+fish {
+	integer numero <= 42<D
+	print("Palabra clave incorrecta")<D
+}

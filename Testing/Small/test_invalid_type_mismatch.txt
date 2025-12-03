@@ -1,0 +1,3 @@
+fish {
+	<int numero <= "texto"<D
+}

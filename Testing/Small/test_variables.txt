@@ -1,0 +1,71 @@
+fish {                       ~~ Pruebas de tipos de datos y variables ~~
+
+    splash("=== TIPOS DE DATOS ===")<D
+    
+    ~~ Enteros ~~
+    <int entero <= 42<D
+    <int negativo <= <-15<D
+    <int cero <= 0<D
+    
+    splash("Entero: ")<D
+    splash(entero)<D
+    splash("Negativo: ")<D
+    splash(negativo)<D
+    splash("Cero: ")<D
+    splash(cero)<D
+    
+    ~~ Strings ~~
+    <string mensaje <= "Hola Fish++"<D
+    <string vacio <= ""<D
+    <string largo <= "Este es un mensaje mas largo para probar strings"<D
+    
+    splash("Mensaje: ")<D
+    splash(mensaje)<D
+    splash("String vacio: ")<D
+    splash(vacio)<D
+    splash("String largo: ")<D
+    splash(largo)<D
+    
+    ~~ Caracteres ~~
+    <charal letra <= 'A'<D
+    <charal digito <= '7'<D
+    <charal simbolo <= '@'<D
+    
+    splash("Letra: ")<D
+    splash(letra)<D
+    splash("Digito: ")<D
+    splash(digito)<D
+    splash("Simbolo: ")<D
+    splash(simbolo)<D
+    
+    ~~ Booleanos (bubble) ~~
+    <bubble verdadero <= 1<D
+    <bubble falso <= 0<D
+    
+    splash("Verdadero: ")<D
+    splash(verdadero)<D
+    splash("Falso: ")<D
+    splash(falso)<D
+    
+    ~~ Decimales (hook) ~~
+    <hook decimal1 <= 3<D
+    <hook decimal2 <= 7<D
+    
+    splash("Decimal 1: ")<D
+    splash(decimal1)<D
+    splash("Decimal 2: ")<D
+    splash(decimal2)<D
+    
+    ~~ Reasignación de variables ~~
+    splash("=== REASIGNACION ===")<D
+    entero <= 100<D
+    splash("Entero reasignado: ")<D
+    splash(entero)<D
+    
+    mensaje <= "Nuevo mensaje"<D
+    splash("Mensaje reasignado: ")<D
+    splash(mensaje)<D
+    
+    splash("Pruebas de variables completadas")<D
+}
+

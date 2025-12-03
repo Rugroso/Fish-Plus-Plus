@@ -1,0 +1,9 @@
+fish {
+	<int edad <= 18<D
+	
+	if (edad <=> 18) {
+		splash("Eres mayor de edad")<D
+	} else {
+		splash("Eres menor de edad")<D
+	}
+}

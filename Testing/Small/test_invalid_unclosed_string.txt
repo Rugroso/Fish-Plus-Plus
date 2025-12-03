@@ -1,0 +1,4 @@
+fish {
+	<string texto <= "Cadena sin cerrar<D
+	splash(texto)<D
+}

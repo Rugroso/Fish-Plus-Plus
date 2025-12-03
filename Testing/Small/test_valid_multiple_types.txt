@@ -1,0 +1,8 @@
+fish {
+	<int entero <= 100<D
+	<string texto <= "Hola Fish++"<D
+	<charal caracter <= 'A'<D
+	<bubble bandera <= true<D
+	
+	splash(texto)<D
+}

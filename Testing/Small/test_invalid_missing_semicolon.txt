@@ -1,0 +1,4 @@
+fish {
+	<int numero <= 42
+	splash("Falta punto y coma")<D
+}

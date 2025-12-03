@@ -1,0 +1,7 @@
+fish {
+	<int contador <= 0<D
+	whale (contador << 5) {
+		splash("Iteración: ")<D
+		contador <++<D
+	}
+}

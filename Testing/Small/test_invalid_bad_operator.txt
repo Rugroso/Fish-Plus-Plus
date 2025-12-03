@@ -1,0 +1,4 @@
+fish {
+	<int suma <= 5 + 10<D
+	splash(suma)<D
+}

@@ -1,0 +1,2 @@
+<int numero <= 42<D
+splash("Sin bloque fish")<D

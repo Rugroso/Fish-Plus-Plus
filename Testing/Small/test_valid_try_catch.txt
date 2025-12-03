@@ -1,0 +1,9 @@
+fish {
+	try {
+		<int division <= 10 </ 0<D
+	} catch {
+		splash("Error: división por cero")<D
+	} finally {
+		splash("Operación finalizada")<D
+	}
+}

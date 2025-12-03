@@ -1,0 +1,4 @@
+fish {
+	if (5 << 10) 
+		splash("Faltan llaves")<D
+}

@@ -1,0 +1,5 @@
+fish {
+	fishtion sumar(<int a, <int b) {
+		emerge a <+ b<D
+	}
+}

@@ -1,0 +1,8 @@
+fish {
+	fishtion multiplicar(<int x, <int y) <int {
+		emerge x <* y<D
+	}
+	
+	<int prod <= multiplicar(4, 5)<D
+	splash(prod)<D
+}

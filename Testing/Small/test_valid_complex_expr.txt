@@ -1,0 +1,6 @@
+fish {
+	<int a <= 10<D
+	<int b <= 20<D
+	<int resultado <= (a <+ b) <* 2 </ 5<D
+	splash(resultado)<D
+}

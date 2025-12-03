@@ -1,0 +1,8 @@
+fish {
+	fishtion sumar(<int a, <int b) <int {
+		emerge a <+ b<D
+	}
+	
+	<int resultado <= sumar(5, 3)<D
+	splash(resultado)<D
+}
